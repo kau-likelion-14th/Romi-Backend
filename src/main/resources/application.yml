@@ -1,16 +1,26 @@
 spring:
   config:
-    import:optional:file.env[.properties]
+    import: optional:file:.env[.properties]
   profiles:
     active: local
 
   servlet:
     multipart:
-      enable: true
+      enabled: true
       max-file-size: 50MB
       max-request-size: 50MB
 
+server:
+  port: ${PORT:8080}
 
+# Swagger
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+    display-request-duration: true
+    operations-sorter: method
 
 ---
 # local profile
@@ -24,8 +34,13 @@ spring:
     password: ${LOCAL_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
     properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialghect
+      dialect: org.hibernate.dialect.MySQLDialect
+
+
+logging:
+  level:
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
