@@ -44,8 +44,7 @@ public class UserProfileController {
 
         // [Q10. 클라이언트가 보낸 JSON 텍스트 데이터가 어떻게 자바 객체인 CreateTestUserRequest로
         // 변환 되는지앞의 어노테이션과 연관 지어 설명해 보세요.]
-        // 답변: **Q10 요약**
-        //
+        // 답변:
         //@RequestBody 어노테이션이 붙으면 Spring 내부의 Jackson 라이브러리가 클라이언트의 JSON을 읽어서 DTO의 필드명에 맞게 자동으로 자바 객체로 변환해줌
 
 
