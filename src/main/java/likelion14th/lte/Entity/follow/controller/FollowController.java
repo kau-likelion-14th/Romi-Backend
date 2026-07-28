@@ -34,9 +34,9 @@ public class FollowController {
     public ApiResponse<FollowUserResponse> addFollow(
             @RequestParam Long userId,
             @RequestBody FollowUserRequest followUserRequest) {
-        // 서비스에 "로그인한 유저 ID"와 "팔로우할 대상 ID"를 넘겨 팔로우를 추가하고, 추가된 대상 유저 정보를 응답 DTO로 받습니다.
+
         FollowUserResponse response = followService.followUser(userId, followUserRequest.getToUserId());
-        // 성공 코드와 응답 데이터를 담은 ApiResponse를 반환합니다. (클라이언트는 이걸 JSON으로 받습니다)
+
         return ApiResponse.onSuccess(SuccessCode.FOLLOW_ADD_SUCCESS, response);
     }
 
@@ -50,7 +50,7 @@ public class FollowController {
             @RequestParam String nickname,
             @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable
     ){
-        // 서비스에서 닉네임으로 팔로우 가능한 유저를 검색하고, 페이징된 결과를 받아 성공 응답으로 반환합니다.
+
         Page<FollowUserResponse> response = followService.searchCanFollowers(userId, nickname, pageable);
         return ApiResponse.onSuccess(SuccessCode.FOLLOW_SEARCH_SUCCESS, response);
     }
