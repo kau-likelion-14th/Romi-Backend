@@ -98,4 +98,5 @@ public class StatisticService {
         int monthPercent = (total == 0) ? 0 : (int) ((completedCount * 100) / total);
         statistic.updateMonthPercent(monthPercent);
     }
+
 }

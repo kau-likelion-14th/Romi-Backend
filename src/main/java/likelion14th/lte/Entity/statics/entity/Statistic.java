@@ -66,4 +66,5 @@ public class Statistic extends BaseEntity {
     public void updateMonthPercent(int monthPercent) {
         this.monthPercent = monthPercent;
     }
+
 }

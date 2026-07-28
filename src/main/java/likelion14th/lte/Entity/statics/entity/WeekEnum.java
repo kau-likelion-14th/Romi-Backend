@@ -17,4 +17,5 @@ public enum WeekEnum {
             case SUN -> DayOfWeek.SUNDAY;
         };
     }
+
 }

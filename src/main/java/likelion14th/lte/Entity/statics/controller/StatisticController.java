@@ -31,4 +31,5 @@ public class StatisticController {
         StatisticResponse response = statisticService.getStatistic(userId);
         return ApiResponse.onSuccess(SuccessCode.STATISTICS_GET_SUCCESS, response);
     }
+
 }

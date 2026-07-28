@@ -41,4 +41,5 @@ public class StatWeek extends BaseEntity {
     public void increaseCount() {
         this.count += 1;
     }
+
 }

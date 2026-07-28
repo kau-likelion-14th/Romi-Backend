@@ -19,4 +19,5 @@ public class StatisticSchedule {
         statisticService.updateAllStatistics();
         log.info("[StatisticSchedule] 전체 유저 통계 갱신 배치 종료");
     }
+
 }
