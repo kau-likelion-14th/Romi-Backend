@@ -48,20 +48,19 @@ public class KakaoClient {
         try {
             JsonNode response = restTemplate.postForObject(tokenUri, request, JsonNode.class);
 
-            if(response == null || !response.has("access_token")) {
+            if (response == null || !response.has("access_token")) {
                 throw new GeneralException(ErrorCode.KAKAO_AUTH_FAILED);
             }
 
             return response.get("access_token").asText();
-        }
-        catch (GeneralException e) {
+        } catch (GeneralException e) {
             throw e;
         } catch (Exception e) {
             throw e;
         }
     }
 
-    public JsonNode getUserInfo (String accessToken) {
+    public JsonNode getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
@@ -76,7 +75,7 @@ public class KakaoClient {
             );
 
             JsonNode body = response.getBody();
-            if(!response.getStatusCode().is2xxSuccessful() || body == null) {
+            if (!response.getStatusCode().is2xxSuccessful() || body == null) {
                 throw new GeneralException(ErrorCode.KAKAO_API_FAILED);
             }
 
@@ -87,4 +86,5 @@ public class KakaoClient {
             throw new GeneralException(ErrorCode.KAKAO_API_FAILED);
         }
     }
+
 }

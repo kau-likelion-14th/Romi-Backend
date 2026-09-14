@@ -19,7 +19,7 @@ public class AuthResponse {
     @JsonIgnore
     private String refreshToken;
 
-    public static AuthResponse from (User user, String accessToken, String refreshToken) {
+    public static AuthResponse from(User user, String accessToken, String refreshToken) {
         return AuthResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -29,4 +29,5 @@ public class AuthResponse {
                 .refreshToken(refreshToken)
                 .build();
     }
+
 }

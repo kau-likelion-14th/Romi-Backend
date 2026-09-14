@@ -14,7 +14,7 @@ public class JwtProvider {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
     private final long accessExpMs;
-    private final long  refreshExpMs;
+    private final long refreshExpMs;
 
     public JwtProvider(
             JwtEncoder jwtEncoder,
@@ -52,14 +52,15 @@ public class JwtProvider {
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
-}
-
-public Long getRefreshTokenExpiration() {
-    return System.currentTimeMillis() + refreshExpMs;
-}
-
-public Long validateRefreshToken(String refreshToken) {
-    Jwt jwt = jwtDecoder.decode(refreshToken);
-    return Long.parseLong(jwt.getSubject());
     }
+
+    public Long getRefreshTokenExpiration() {
+        return System.currentTimeMillis() + refreshExpMs;
+    }
+
+    public Long validateRefreshToken(String refreshToken) {
+        Jwt jwt = jwtDecoder.decode(refreshToken);
+        return Long.parseLong(jwt.getSubject());
+    }
+
 }

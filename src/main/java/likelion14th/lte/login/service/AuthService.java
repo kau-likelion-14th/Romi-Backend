@@ -105,11 +105,11 @@ public class AuthService {
 
     private String createUniqueUserTag() {
         String userTag;
-            userTag = "KAKAO" + UUID.randomUUID()
-                    .toString()
-                    .replace("-", "")
-                    .substring(0, 8)
-                    .toUpperCase();
+        userTag = "KAKAO" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8)
+                .toUpperCase();
 
         return userTag;
     }
@@ -118,4 +118,5 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
     }
+
 }

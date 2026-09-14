@@ -61,23 +61,24 @@ public class AuthController {
     public ApiResponse<String> reissue(
             @Parameter(hidden = true)
             @CookieValue(value = "refresh_token", required = false) String refreshToken
-    ){
+    ) {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new GeneralException(ErrorCode.TOKEN_INVALID);
         }
 
         String newAccessToken = authService.reissueAccessToken(refreshToken);
 
-        return  ApiResponse.onSuccess(SuccessCode.USER_REISSUE_SUCCESS, newAccessToken);
+        return ApiResponse.onSuccess(SuccessCode.USER_REISSUE_SUCCESS, newAccessToken);
     }
 
     @PostMapping("/logout")
     @Operation(summary = "로그아웃", description = "DB의 refreshToken을 삭제해서 로그아웃")
-    public ApiResponse<Void> logout (
+    public ApiResponse<Void> logout(
             @AuthenticationPrincipal Jwt jwt,
             HttpServletResponse httpResponse
-            ) {
+    ) {
         Long userId = Long.valueOf(jwt.getSubject());
+        authService.withdraw(userId);
         authService.logout(userId);
 
         httpResponse.addHeader(
@@ -102,7 +103,7 @@ public class AuthController {
         return ApiResponse.onSuccess(SuccessCode.USER_DELETE_SUCCESS, null);
     }
 
-    public ResponseCookie createRefreshTokenCookie (String refreshToken) {
+    public ResponseCookie createRefreshTokenCookie(String refreshToken) {
         return ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
                 .secure(cookieSecure)
@@ -122,4 +123,5 @@ public class AuthController {
                 .build();
 
     }
+
 }

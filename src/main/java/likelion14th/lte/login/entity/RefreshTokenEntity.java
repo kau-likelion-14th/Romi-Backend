@@ -22,7 +22,7 @@ public class RefreshTokenEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false,length = 1000)
+    @Column(nullable = false, length = 1000)
     private String refreshTokenEntity;
 
     @Column(nullable = false)
@@ -30,13 +30,14 @@ public class RefreshTokenEntity {
 
     @Builder
     public RefreshTokenEntity(User user, String refreshToken, Long refreshTokenExpiration) {
-        this.user=user;
-        this.refreshTokenEntity=refreshToken;
-        this.refreshTokenExpiration=refreshTokenExpiration;
+        this.user = user;
+        this.refreshTokenEntity = refreshToken;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
     public void updateToken(String refreshToken, Long refreshTokenExpiration) {
-        this.refreshTokenEntity=refreshToken;
-        this.refreshTokenExpiration=refreshTokenExpiration;
+        this.refreshTokenEntity = refreshToken;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
+
 }
