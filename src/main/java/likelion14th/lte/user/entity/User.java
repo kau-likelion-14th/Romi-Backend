@@ -1,27 +1,29 @@
 package likelion14th.lte.user.entity;
 
+
+import likelion14th.lte.login.entity.RefreshTokenEntity;
 import jakarta.persistence.*;
 import likelion14th.lte.Entity.BaseEntity;
+import likelion14th.lte.Entity.follow.entity.Follow;
+import likelion14th.lte.Entity.statics.entity.Statistic;
+import likelion14th.lte.youtube.domain.SavedSong;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
-// [Q1. @NoArgsConstructor는 매개변수가 없는 기본 생성자를 만듭니다.
-// 그런데 왜 누구나 쓸 수 있게 PUBLIC으로 열어두지 않고, 굳이 PROTECTED로 막아두었을까요? (객체 생성의 안전성과 JPA 관점)]
-// 답변: 아무나 함부로 빈 객체를 만드는 것을 막기 위함
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor (access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
-
-    @Id //기본키
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // [Q2. @Column(nullable = false) 어노테이션이 DB와 자바 코드 사이에서 하는 역할은 무엇인가요?]
-    // 답변: 이 칼럼이 비어있으면 안된다는 것을 알려줌
     @Column(nullable = false)
     private String username;
 
@@ -31,16 +33,51 @@ public class User extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String introduction;
 
+    @Column(columnDefinition = "TEXT")
+    private String profileImage;
+
+    @Column(columnDefinition = "TEXT")
+    private String s3ImageKey;
+
+    @Column(unique = true)
+    private String providerId;
+
+    @OneToMany(mappedBy = "toUser",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers;
+
+    @OneToMany(mappedBy = "fromUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followings;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "statistic_id")
+    private Statistic statistic;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SavedSong> savedSongs;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshTokenEntity refreshToken;
+
+
     @Builder(access = AccessLevel.PUBLIC)
-    private User (String username, String introduction, String userTag){
+    private User (String providerId, String username, String userTag, String introduction, String s3ImageKey, String profileImage){
+        this.providerId = providerId;
         this.username = username;
         this.userTag = userTag;
         this.introduction = introduction;
+        this.s3ImageKey = s3ImageKey;
+        this.profileImage = profileImage;
+        this.followers = new ArrayList<>();
+        this.followings = new ArrayList<>();
+        this.statistic = Statistic.create();
+        this.savedSongs = new ArrayList<>();
+    }
+    public void fixUserProfile(String s3ImageUrl, String s3ImageKey){
+        this.s3ImageKey = s3ImageKey;
+        this.profileImage = s3ImageUrl;
     }
 
-    // [Q3. @Setter를 위 @Getter 처럼 사용하면 모든 맴버들에 setIntruduction() 같은 setter 메서드가 생성됩니다. 하지만 왜 @Setter를 쓰지않고 updateIntroduction() 이라는 명확한 메서드를 만든 객체지향적인 이유는 무엇인가요?]
-    // 답변: 명확한 의도를 드러내 코드의 안전성과 가독성을 높이기 위함
-    public void updateIntroduction(String introduction){
+    public void updateIntroduction(String introduction) {
         this.introduction = introduction;
     }
 
