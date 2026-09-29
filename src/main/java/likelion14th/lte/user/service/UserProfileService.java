@@ -1,8 +1,10 @@
 package likelion14th.lte.user.service;
 
+import ch.qos.logback.core.status.ErrorStatus;
 import likelion14th.lte.global.api.ErrorCode;
 import likelion14th.lte.global.exception.GeneralException;
 import likelion14th.lte.user.dto.request.CreateTestUserRequest;
+import likelion14th.lte.user.dto.request.UserIntroRequest;
 import likelion14th.lte.user.dto.response.UserProfileResponse;
 import likelion14th.lte.user.entity.User;
 import likelion14th.lte.user.repository.UserRepository;
@@ -110,5 +112,42 @@ public class UserProfileService {
             case S3_UPLOAD_FAILED -> ErrorCode.S3_UPLOAD_FAILED;
             case S3_DELETE_FAILED -> ErrorCode.S3_DELETE_FAILED;
         };
+    }
+
+    @Transactional
+    public UserProfileResponse deleteProfileImage(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        String s3ImageKey = user.getS3ImageKey();
+
+
+        if (s3ImageKey != null && !s3ImageKey.isBlank()) {
+            try {
+                s3Utils.deleteFile(s3ImageKey);
+            } catch (UtilException e) {
+                throw new GeneralException(ErrorCode.S3_DELETE_FAILED);
+            }
+        }
+
+        user.deleteProfileImage();
+        return UserProfileResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getToUserProfile(Long toUserId) {
+        User toUser = userRepository.findById(toUserId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND)); // USER_4041
+
+        return UserProfileResponse.from(toUser);
+    }
+
+    @Transactional
+    public UserProfileResponse updateIntroduction(Long userId, UserIntroRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND)); // USER_4041
+
+        user.updateIntroduction(request.getIntroduce()); // 프로필 이미지는 건드리지 않음
+        return UserProfileResponse.from(user);           // 더티 체킹으로 DB 반영
     }
 }
