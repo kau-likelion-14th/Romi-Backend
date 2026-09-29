@@ -20,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor (access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -41,7 +41,7 @@ public class User extends BaseEntity {
     @Column(unique = true)
     private String providerId;
 
-    @OneToMany(mappedBy = "toUser",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "toUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers;
 
     @OneToMany(mappedBy = "fromUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,7 +59,7 @@ public class User extends BaseEntity {
 
 
     @Builder(access = AccessLevel.PUBLIC)
-    private User (String providerId, String username, String userTag, String introduction){
+    private User(String providerId, String username, String userTag, String introduction) {
         this.providerId = providerId;
         this.username = username;
         this.userTag = userTag;
@@ -70,5 +70,6 @@ public class User extends BaseEntity {
     public void updateIntroduction(String introduction) {
         this.introduction = introduction;
     }
+
 
 }

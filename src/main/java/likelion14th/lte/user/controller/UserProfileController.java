@@ -31,7 +31,7 @@ public class UserProfileController {
     @Operation(summary = "유저 프로필 조회", description = "유저아이디를 받아 유저 프로필을 어쩌구")
     public ApiResponse<UserProfileResponse> getUserProfile(
             @AuthenticationPrincipal Jwt jwt
-    ){
+    ) {
         Long userId = Long.valueOf(jwt.getSubject());
         UserProfileResponse userProfileResponse = userProfileService.getUserProfile(userId);
 
@@ -43,7 +43,7 @@ public class UserProfileController {
     @Operation(summary = "테스트 유저를 생성", description = "이름, 한줄 소개 어쩌구")
     public ApiResponse<UserProfileResponse> createTestProfile(
             @RequestBody CreateTestUserRequest createTestUserRequest
-            ){
+    ) {
 
         // [Q10. 클라이언트가 보낸 JSON 텍스트 데이터가 어떻게 자바 객체인 CreateTestUserRequest로
         // 변환 되는지앞의 어노테이션과 연관 지어 설명해 보세요.]
@@ -54,4 +54,5 @@ public class UserProfileController {
         UserProfileResponse response = userProfileService.createTestUser(createTestUserRequest);
         return ApiResponse.onSuccess(SuccessCode.OK, response);
     }
+
 }

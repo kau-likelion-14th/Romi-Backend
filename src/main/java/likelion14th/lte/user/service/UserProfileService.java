@@ -44,15 +44,14 @@ public class UserProfileService {
                 .build();
 
         User saveUser;
-        try{
+        try {
 
             // [Q8. 데이터를 저장하는 이 메서드 위에 @Transactional이 반드시 붙어야 하는 이유는 무엇인가요?
             // (저장 도중 DB 서버가 끊겼을 때의 상황을 가정해서 설명하세요)]
             // 답변: 만약 아래 코드 실행 중 에러가 터지면, 지금까지 DB에 넣은 데이터를 모두 롤백되므로 데이터 삽입을 위해 무조건 붙어야 함.
 
             saveUser = userRepository.save(newUser);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new GeneralException(ErrorCode.BAD_REQUEST);
         }
         return UserProfileResponse.from(saveUser);
@@ -61,9 +60,11 @@ public class UserProfileService {
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new GeneralException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
 
         return UserProfileResponse.from(user);
     }
 
+
 }
+
