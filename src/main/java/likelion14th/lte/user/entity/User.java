@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor (access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -41,7 +42,7 @@ public class User extends BaseEntity {
     @Column(unique = true)
     private String providerId;
 
-    @OneToMany(mappedBy = "toUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "toUser",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers;
 
     @OneToMany(mappedBy = "fromUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,17 +60,25 @@ public class User extends BaseEntity {
 
 
     @Builder(access = AccessLevel.PUBLIC)
-    private User(String providerId, String username, String userTag, String introduction) {
+    private User (String providerId, String username, String userTag, String introduction){
         this.providerId = providerId;
         this.username = username;
         this.userTag = userTag;
         this.introduction = introduction;
+        this.s3ImageKey = s3ImageKey;
+        this.profileImage = profileImage;
+        this.followers = new ArrayList<>();
+        this.followings = new ArrayList<>();
         this.statistic = Statistic.create();
+        this.savedSongs = new ArrayList<>();
+    }
+    public void fixUserProfile(String s3ImageUrl, String s3ImageKey){
+        this.s3ImageKey = s3ImageKey;
+        this.profileImage = s3ImageUrl;
     }
 
     public void updateIntroduction(String introduction) {
         this.introduction = introduction;
     }
-
 
 }
