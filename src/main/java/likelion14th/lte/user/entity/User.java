@@ -81,4 +81,9 @@ public class User extends BaseEntity {
         this.introduction = introduction;
     }
 
+    public void deleteProfileImage() {
+        this.profileImage = null;
+        this.s3ImageKey = null;
+    }
+
 }

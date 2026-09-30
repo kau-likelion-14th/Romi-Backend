@@ -1,6 +1,6 @@
 package likelion14th.lte.user.service;
 
-import ch.qos.logback.core.status.ErrorStatus;
+
 import likelion14th.lte.global.api.ErrorCode;
 import likelion14th.lte.global.exception.GeneralException;
 import likelion14th.lte.user.dto.request.CreateTestUserRequest;
