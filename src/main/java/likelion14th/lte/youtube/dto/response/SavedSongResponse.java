@@ -1,6 +1,5 @@
 package likelion14th.lte.youtube.dto.response;
 
-
 import likelion14th.lte.youtube.domain.SavedSong;
 import lombok.Builder;
 import lombok.Getter;
