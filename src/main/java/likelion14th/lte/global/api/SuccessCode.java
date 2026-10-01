@@ -26,6 +26,7 @@ public enum SuccessCode implements BaseCode { // 성공
     PROFILE_PUT_SUCCESS(HttpStatus.OK, "PROFILE_2001", "프로필 수정(추가)이 완료되었습니다."),
     PROFILE_DELETE_SUCCESS(HttpStatus.OK, "PROFILE_2002", "프로필 삭제가 완료되었습니다."),
 
+
     //Statistic
     STATISTICS_GET_SUCCESS(HttpStatus.OK,"STATISTIC_2001","통계 조회가 완료되었습니다."),
 

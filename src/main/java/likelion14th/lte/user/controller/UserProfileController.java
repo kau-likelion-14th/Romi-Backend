@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
-@RequestMapping("/api/profile")
+@RequestMapping("/api/prifile")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 
 public class UserProfileController {
@@ -104,6 +104,7 @@ public class UserProfileController {
         UserProfileResponse response = userProfileService.updateIntroduction(userId, request);
         return ApiResponse.onSuccess(SuccessCode.USER_PROFILE_UPDATE_SUCCESS, response);
     }
+
 
 
 }
