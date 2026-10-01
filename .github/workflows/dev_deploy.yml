@@ -49,17 +49,15 @@ jobs:
           run : echo "${{steps.current-time.outputs.formattedTime }}"
           shell : bash
 
-        - name : Generate deployment package
-          run :
-
+        - name: Generate deployment package
+          run: |
             mkdir -p deploy
             cp build/libs/*.jar deploy/application.jar
-            cp Procfile deploy/Profile
-            cp .ev deploy/.env
-            cp -r .ebxtensions_dev deploy/.ebextensions
+            cp Procfile deploy/Procfile
+            cp .env deploy/.env
+            cp -r .ebextensions_dev deploy/.ebextensions
             cp -r .platform deploy/.platform
-          
-            cd deploy && zip -r deploy.zip
+            cd deploy && zip -r deploy.zip .
 
         - name : Verify deploy zip content
           run : |
