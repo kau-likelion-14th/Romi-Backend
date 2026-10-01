@@ -1,6 +1,5 @@
 package likelion14th.lte.youtube.service;
 
-
 import likelion14th.lte.global.api.ErrorCode;
 import likelion14th.lte.global.exception.GeneralException;
 import likelion14th.lte.user.entity.User;
@@ -25,24 +24,9 @@ import java.util.List;
 @Transactional
 public class YouTubeService {
 
-    private static final String DUMMY_LOGIN_ID = "dummy";
-    private static final String DUMMY_USERNAME = "dummy";
-    private static final String DUMMY_USER_TAG = "dummy";
-
     private final YouTubeClient youTubeClient;
     private final SavedSongRepository savedSongRepository;
     private final UserRepository userRepository;
-
-    private User getDummyUser() {
-        return userRepository.findByUsername(DUMMY_USERNAME)
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .username(DUMMY_USERNAME)
-                                .userTag(DUMMY_USER_TAG)
-                                .introduction("더미 데이터")
-                                .build()
-                ));
-    }
 
     @Transactional(readOnly = true)
     public List<YouTubeSongItemResponse> searchSongs(String query, int limit) {
@@ -50,19 +34,17 @@ public class YouTubeService {
         JsonNode items = root.path("items");
         List<YouTubeSongItemResponse> result = new ArrayList<>();
 
-        if(!items.isArray()) {
+        if (!items.isArray()) {
             return result;
         }
 
-        for(JsonNode item : items) {
-            String videoId = items.path("id").path("videoId")
-                    .asText(null);
-            if(videoId == null) {
+        for (JsonNode item : items) {
+            String videoId = item.path("id").path("videoId").asText(null); // items → item
+            if (videoId == null) {
                 continue;
             }
 
             JsonNode snippet = item.path("snippet");
-
 
             result.add(YouTubeSongItemResponse.builder()
                     .songId(videoId)
@@ -75,21 +57,20 @@ public class YouTubeService {
         return result;
     }
 
-    public SavedSongResponse saveSong(String songId) {
-        if(songId == null || songId.isBlank()) {
+    public SavedSongResponse saveSong(Long userId, String songId) {
+        if (songId == null || songId.isBlank()) {
             throw new GeneralException(ErrorCode.BAD_REQUEST);
         }
-        //추후 로그인 기능 구현 후 수정 예정
-        User user = getDummyUser();
 
-        if(savedSongRepository.existsByUserAndSongId(user, songId)) {
+        User user = getUser(userId);
+
+        if (savedSongRepository.existsByUserAndSongId(user, songId)) {
             throw new GeneralException(ErrorCode.SONG_ALREADY_SAVED);
         }
 
-        JsonNode item = getfirstVideo(songId);
+        JsonNode item = getFirstVideo(songId);
         JsonNode snippet = item.path("snippet");
-        String duration = item.path("contentDetails")
-                .path("duration").asText(null);
+        String duration = item.path("contentDetails").path("duration").asText(null);
 
         SavedSong savedSong = SavedSong.builder()
                 .user(user)
@@ -97,66 +78,63 @@ public class YouTubeService {
                 .title(snippet.path("title").asText(""))
                 .artist(snippet.path("channelTitle").asText(""))
                 .imageUrl(extractThumbnail(snippet))
-                .durationMs(parseDurationsMs(duration))
+                .durationMs(parseDurationMs(duration))
                 .build();
 
         return SavedSongResponse.from(savedSongRepository.save(savedSong));
     }
 
-    private JsonNode getfirstVideo(String videoId) {
-        JsonNode root = youTubeClient.getVideoRaw(videoId);
-        JsonNode items = root.path("items");
-
-        if(!items.isArray() || items.size() == 0) {
-            throw new GeneralException(ErrorCode.SONG_NOT_FOUND);
-        }
-
-        return items.get(0);
-    }
-
-    public List<SavedSongResponse> mySavedSongs() {
-        User user = getDummyUser();
+    @Transactional(readOnly = true)
+    public List<SavedSongResponse> mySavedSongs(Long userId) {
+        User user = getUser(userId);
 
         return savedSongRepository.findAllByUserOrderBySavedAtDesc(user)
                 .stream()
                 .map(SavedSongResponse::from)
                 .toList();
-
     }
 
-    public void deleteSavedSong(String songId) {
-        User user = getDummyUser();
+    public void deleteSavedSong(Long userId, String songId) {
+        User user = getUser(userId);
 
         SavedSong savedSong = savedSongRepository.findByUserAndSongId(user, songId)
-                .orElseThrow(()-> new GeneralException((ErrorCode.SONG_NOT_FOUND)));
-                savedSongRepository.delete(savedSong);
+                .orElseThrow(() -> new GeneralException(ErrorCode.SONG_NOT_FOUND));
 
+        savedSongRepository.delete(savedSong);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private JsonNode getFirstVideo(String videoId) {
+        JsonNode root = youTubeClient.getVideoRaw(videoId);
+        JsonNode items = root.path("items");
+
+        if (!items.isArray() || items.size() == 0) {
+            throw new GeneralException(ErrorCode.SONG_NOT_FOUND);
+        }
+        return items.get(0);
     }
 
     private String extractThumbnail(JsonNode snippet) {
-        String imageUrl = snippet.path("thumbnails").path("high")
-                .path("url").asText(null);
+        String imageUrl = snippet.path("thumbnails").path("high").path("url").asText(null);
 
         if (imageUrl == null || imageUrl.isBlank()) {
-            imageUrl = snippet.path("thumbnail").path("default")
-                    .path("url").asText(null);
+            imageUrl = snippet.path("thumbnails").path("default").path("url").asText(null); // thumbnail → thumbnails
         }
-
         return imageUrl;
     }
 
-    private Long parseDurationsMs(String duration) {
+    private Long parseDurationMs(String duration) {
         if (duration == null || duration.isBlank()) {
             return null;
         }
-
         try {
             return Duration.parse(duration).toMillis();
-
         } catch (DateTimeParseException e) {
-
             return null;
-
         }
     }
 }
