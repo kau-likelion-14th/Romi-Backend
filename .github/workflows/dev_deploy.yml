@@ -62,7 +62,7 @@ on:
             cd deploy && zip -r deploy.zip
 
         - name : Verify deploy zip content
-          run :
+          run : |
             unzip -l deploy/deploy.zip | head -n 50
           
             unzip -l deploy/deploy.zip | egrep -i "pom.xml|Buildfile|src/|repository/"
