@@ -1,15 +1,22 @@
 package likelion14th.lte.user.service;
 
+
 import likelion14th.lte.global.api.ErrorCode;
 import likelion14th.lte.global.exception.GeneralException;
 import likelion14th.lte.user.dto.request.CreateTestUserRequest;
+import likelion14th.lte.user.dto.request.UserIntroRequest;
 import likelion14th.lte.user.dto.response.UserProfileResponse;
 import likelion14th.lte.user.entity.User;
 import likelion14th.lte.user.repository.UserRepository;
+import likelion14th.lte.utils.Image.ImageUtil;
+import likelion14th.lte.utils.S3.S3Dto;
+import likelion14th.lte.utils.S3.S3Utils;
+import likelion14th.lte.utils.exception.UtilException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor (access = AccessLevel.PROTECTED)
@@ -20,6 +27,8 @@ public class UserProfileService {
     // UserRepository 랑 강한 결합을 맺게 됨.
     // 직접 생성하면 테스트가 불가함.
     private final UserRepository userRepository;
+    private final S3Utils s3Utils;
+    private final ImageUtil imageUtil;
 
     // [Q6. (코딩 문제) 만약 클래스 위의 @RequiredArgsConstructor를 지운다면,
     // 우리가 직접 작성해야 할 의존성 주입용 자바 '생성자' 코드는 어떤 모습일까요? 아래에 직접 코딩해 보세요.]
@@ -66,4 +75,80 @@ public class UserProfileService {
         return UserProfileResponse.from(user);
     }
 
+    @Transactional
+    public UserProfileResponse putProfileImage(Long userId, MultipartFile file){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        try{
+            imageUtil.validateImage(file);
+            ImageUtil.ResizedImage resizedImage =
+                    imageUtil.resizeProfileToPngBytes(file, 256);
+
+            String originalFilenames = file.getOriginalFilename();
+            String baseName = originalFilenames.contains(".")
+                    ?originalFilenames.substring(originalFilenames.lastIndexOf("."))
+                    : originalFilenames;
+
+            S3Dto result =
+                    s3Utils.uploadBytes(resizedImage.bytes(), baseName+".png", resizedImage.contentType());
+            if(user.getS3ImageKey()!=null){
+                s3Utils.deleteFile(user.getS3ImageKey());
+            }
+            user.fixUserProfile(result.getUrl(),result.getKey());
+            return UserProfileResponse.from(user);
+        }catch (UtilException e){
+            throw GeneralException.of(mapToErrorCode(e.getReason()));
+        }
+    }
+
+    private ErrorCode mapToErrorCode(UtilException.Reason reason) {
+        return switch (reason) {
+            case FILE_EMPTY -> ErrorCode.IMAGE_FILE_EMPTY;
+            case FILE_TOO_LARGE -> ErrorCode.IMAGE_TOO_LARGE;
+            case TYPE_NOT_ALLOWED -> ErrorCode.IMAGE_TYPE_NOT_ALLOWED;
+
+            case IMAGE_PROCESS_FAILED -> ErrorCode.IMAGE_PROCESS_FAILED;
+
+            case S3_UPLOAD_FAILED -> ErrorCode.S3_UPLOAD_FAILED;
+            case S3_DELETE_FAILED -> ErrorCode.S3_DELETE_FAILED;
+        };
+    }
+
+    @Transactional
+    public UserProfileResponse deleteProfileImage(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND));
+
+        String s3ImageKey = user.getS3ImageKey();
+
+
+        if (s3ImageKey != null && !s3ImageKey.isBlank()) {
+            try {
+                s3Utils.deleteFile(s3ImageKey);
+            } catch (UtilException e) {
+                throw new GeneralException(ErrorCode.S3_DELETE_FAILED);
+            }
+        }
+
+        user.deleteProfileImage();
+        return UserProfileResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getToUserProfile(Long toUserId) {
+        User toUser = userRepository.findById(toUserId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND)); // USER_4041
+
+        return UserProfileResponse.from(toUser);
+    }
+
+    @Transactional
+    public UserProfileResponse updateIntroduction(Long userId, UserIntroRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorCode.USER_NOT_FOUND)); // USER_4041
+
+        user.updateIntroduction(request.getIntroduce()); // 프로필 이미지는 건드리지 않음
+        return UserProfileResponse.from(user);           // 더티 체킹으로 DB 반영
+    }
 }

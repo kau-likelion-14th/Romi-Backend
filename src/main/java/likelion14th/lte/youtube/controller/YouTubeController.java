@@ -1,6 +1,5 @@
 package likelion14th.lte.youtube.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import likelion14th.lte.global.api.ApiResponse;
@@ -10,6 +9,8 @@ import likelion14th.lte.youtube.dto.response.SavedSongResponse;
 import likelion14th.lte.youtube.dto.response.YouTubeSongItemResponse;
 import likelion14th.lte.youtube.service.YouTubeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/youtube")
-
 public class YouTubeController {
 
     private final YouTubeService youTubeService;
@@ -32,21 +32,27 @@ public class YouTubeController {
 
     @PostMapping("/save")
     @Operation(summary = "곡 저장")
-    public ApiResponse<SavedSongResponse> save(@Valid @RequestBody SongSaveRequest req) {
-        return ApiResponse.onSuccess(SuccessCode.OK, youTubeService.saveSong(req.getSongId()));
+    public ApiResponse<SavedSongResponse> save(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody SongSaveRequest request) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        return ApiResponse.onSuccess(SuccessCode.OK, youTubeService.saveSong(userId, request.getSongId()));
     }
 
     @GetMapping("/me")
     @Operation(summary = "내가 저장한 곡 조회")
-    public ApiResponse<List<SavedSongResponse>> myList() {
-        return ApiResponse.onSuccess(SuccessCode.OK, youTubeService.mySavedSongs());
+    public ApiResponse<List<SavedSongResponse>> myList(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        return ApiResponse.onSuccess(SuccessCode.OK, youTubeService.mySavedSongs(userId));
     }
 
     @DeleteMapping("/save/{songId}")
     @Operation(summary = "저장된 곡 삭제")
-    public ApiResponse<Void> delete(@PathVariable String songId) {
-        youTubeService.deleteSavedSong(songId);
+    public ApiResponse<Void> delete(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String songId) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        youTubeService.deleteSavedSong(userId, songId);
         return ApiResponse.onSuccess(SuccessCode.OK, null);
     }
-
 }

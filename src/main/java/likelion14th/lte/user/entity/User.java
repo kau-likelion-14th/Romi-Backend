@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -64,11 +65,25 @@ public class User extends BaseEntity {
         this.username = username;
         this.userTag = userTag;
         this.introduction = introduction;
+        this.s3ImageKey = s3ImageKey;
+        this.profileImage = profileImage;
+        this.followers = new ArrayList<>();
+        this.followings = new ArrayList<>();
         this.statistic = Statistic.create();
+        this.savedSongs = new ArrayList<>();
+    }
+    public void fixUserProfile(String s3ImageUrl, String s3ImageKey){
+        this.s3ImageKey = s3ImageKey;
+        this.profileImage = s3ImageUrl;
     }
 
     public void updateIntroduction(String introduction) {
         this.introduction = introduction;
+    }
+
+    public void deleteProfileImage() {
+        this.profileImage = null;
+        this.s3ImageKey = null;
     }
 
 }
