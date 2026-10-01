@@ -36,8 +36,10 @@ public class SwaggerConfig {
                 .description("Lte Local Server");
 
         Server httpServer = new Server()
-                .url("http://Lte-dev-env-2.eba-xaqgpxhu.ap-northeast-2.elasticbeanstalk.com")
+                .url("http://lte-dev-env.eba-pa6waecz.ap-northeast-2.elasticbeanstalk.com/")
                 .description("LTE HTTP Server");
+
+
 
         return new OpenAPI()
                 .info(apiInfo)
