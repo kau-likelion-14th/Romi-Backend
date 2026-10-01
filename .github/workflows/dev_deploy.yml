@@ -73,7 +73,7 @@ jobs:
 
             application_name : 'lte_dev'
             version_label : github-actions-${{ steps.current-time.outputs.formattedTime }}
-            region : 'ap-northest-2'
+            region : 'ap-northeast-2'
 
             deployment_package : 'deploy/deploy.zip'
             wait_for_deployment : true
