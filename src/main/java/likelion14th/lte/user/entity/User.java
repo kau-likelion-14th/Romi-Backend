@@ -60,7 +60,7 @@ public class User extends BaseEntity {
 
 
     @Builder(access = AccessLevel.PUBLIC)
-    private User (String providerId, String username, String userTag, String introduction, String s3ImageKey, String profileImage){
+    private User (String providerId, String username, String userTag, String introduction){
         this.providerId = providerId;
         this.username = username;
         this.userTag = userTag;
@@ -86,5 +86,4 @@ public class User extends BaseEntity {
         this.s3ImageKey = null;
     }
 
-    }
-
+}
