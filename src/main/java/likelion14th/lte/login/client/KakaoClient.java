@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-
-
-
+@Slf4j
 @Component
 public class KakaoClient {
     private final RestTemplate restTemplate = new RestTemplate();
@@ -55,8 +55,13 @@ public class KakaoClient {
             return response.get("access_token").asText();
         } catch (GeneralException e) {
             throw e;
+        } catch (HttpClientErrorException e) {
+            log.warn("카카오 토큰 발급 실패 (status={}, redirect_uri={}): {}",
+                    e.getStatusCode(), redirectUri, e.getResponseBodyAsString());
+            throw new GeneralException(ErrorCode.KAKAO_AUTH_FAILED);
         } catch (Exception e) {
-            throw e;
+            log.error("카카오 토큰 API 호출 오류", e);
+            throw new GeneralException(ErrorCode.KAKAO_API_FAILED);
         }
     }
 

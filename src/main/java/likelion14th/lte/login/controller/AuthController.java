@@ -33,7 +33,7 @@ public class AuthController {
     @Value("${auth.cookie.secure}")
     private boolean cookieSecure;
 
-    @Value("${auth.cooke.same-site")
+    @Value("${auth.cookie.same-site}")
     private String cookieSameSite;
 
     @Value("${jwt.refresh-exp-ms}")
